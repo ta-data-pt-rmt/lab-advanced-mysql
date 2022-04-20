@@ -133,11 +133,48 @@ LIMIT 3;
 /*
 Challenge 2 - Alternative Solution
 */
+SELECT 
+au_id, 
+au_lname AS "LAST NAME",
+au_fname AS "FIRST NAME",
+SUM(total_royalties) + SUM(total_advance) AS profit
+FROM 
+	(
+	SELECT 
+	titles.title_id,
+	authors.au_id, 
+	authors.au_lname,
+	authors.au_fname,
+	titles.title,
+	#r.sales_royalty
+	SUM(sales_royalty) AS total_royalties,
+	SUM(titles.advance) AS total_advance
+	FROM authors
+	INNER JOIN titleauthor
+	ON authors.au_id = titleauthor.au_id
+	INNER JOIN titles
+	ON titleauthor.title_id = titles.title_id
+	INNER JOIN royalties_step1 r
+	ON r.title_id = titles.title_id
+	GROUP BY authors.au_id,titles.title_id) royalties_step2
+GROUP BY au_id
+ORDER BY PROFIT DESC
+LIMIT 3;
 
 /*
-
+challenge 3
 */
 
-/*
+#-- create most_profiting_authors
+drop table if exists most_profiting_authors;
 
-*/
+create table most_profiting_authors  as
+SELECT 
+au_id, 
+au_lname AS "LAST NAME",
+au_fname AS "FIRST NAME",
+SUM(total_royalties) + SUM(total_advance) AS profit
+FROM royalties_step2
+GROUP BY au_id
+ORDER BY PROFIT DESC
+LIMIT 3  ;
